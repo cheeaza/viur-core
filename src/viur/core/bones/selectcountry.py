@@ -764,13 +764,19 @@ class SelectCountryBone(SelectBone):
     def __init__(self, *, codes=ISO2, values=None, **kwargs):
         global ISO2CODES, ISO3CODES
         assert codes in [self.ISO2, self.ISO3]
-        assert values is None
+        assert values is None or isinstance(values, dict)
+
+        if values is None:
+            values = OrderedDict(sorted((ISO2CODES if codes == self.ISO2 else ISO3CODES).items(), key=lambda i: i[1]))
+        else:
+            assert set(values).issubset(
+                set(ISO2CODES if codes == self.ISO2 else ISO3CODES)), 'Value not recognized, should be in ISO 3166-1'
+            values = OrderedDict(values)
 
         super().__init__(
-            values=OrderedDict(sorted((ISO2CODES if codes == self.ISO2 else ISO3CODES).items(), key=lambda i: i[1])),
+            values=values,
             **kwargs
         )
-
         self.codes = codes
 
     def singleValueUnserialize(self, val):
